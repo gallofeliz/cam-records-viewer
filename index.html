@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <style type="text/css">
+        #viewer {
+        }
+        #viewer img {
+            max-width: 768px;
+        }
+        #frame {
+            display: block;
+            width: 768px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="viewer">
+        <img />
+        <input type="range" id="frame" name="volume"
+         min="0" max="0">
+         <ul>
+             <li id="previous">Previous</li>
+             <li id="next">Next</li>
+
+             <li id="play">Play</li>
+             <li id="pause">Pause</li>
+             <li id="reset">Reset</li>
+         </ul>
+    </div>
+
+    <script type="text/javascript">
+
+        (async () => {
+
+            const images = (await (await fetch('./images.json')).json())
+
+            console.log(images)
+
+            const img = document.querySelector('#viewer img')
+            const frame = document.querySelector('#frame')
+
+            frame.onchange = (e) => {
+                i = e.target.value;
+                loadImage();
+            }
+
+            document.querySelector('#play').onclick = () => {
+                if (i < images.length - 1) {
+                    playing = true;
+                    i++;
+                    loadImage();
+                }
+            }
+
+            document.querySelector('#pause').onclick = () => {
+                playing = false;
+            }
+
+            document.querySelector('#reset').onclick = () => {
+                playing = false;
+                i = 0;
+                loadImage()
+            }
+
+            document.querySelector('#previous').onclick = () => {
+                i--;
+                loadImage()
+            }
+
+            document.querySelector('#next').onclick = () => {
+                if (i < images.length - 1) {
+                    i++;
+                    loadImage()
+                }
+            }
+
+            frame.max = images.length - 1;
+
+            var i = 0;
+            var playing = false;
+
+            function loadImage() {
+                img.src=images[i]
+                frame.value = i
+            }
+
+            img.onload = function () {
+                if (playing && i < images.length - 1) {
+                    i++
+                    loadImage()
+                }
+            }
+
+            loadImage()
+
+        })()
+
+    </script>
+</body>
+</html>
