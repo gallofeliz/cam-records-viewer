@@ -14,8 +14,7 @@ app.get('/images.json', (req, res) => {
 
     const from = moment().subtract(1, 'day')
     const to = moment();
-    const nbDays = Math.ceil(to.diff(from, 'hours', true));
-
+    const nbDays = to.diff(from, 'hours') + 1;
     const dirsSearch = []
     const filesSearch = (new Array(nbDays)).fill().map((_, i) =>  {
         const d = from.clone().add(i, 'hours');
@@ -27,7 +26,6 @@ app.get('/images.json', (req, res) => {
     }
     );
 
-    console.log(dirsSearch, filesSearch)
 
     glob(`images/@(${dirsSearch.join('|')})/@(${filesSearch.join('|')})*.jpg`, (e, files) => {
         res.json(files)

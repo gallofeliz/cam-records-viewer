@@ -8,3 +8,5 @@
        - "8080:8080"
      volumes:
        - ./images:/app/images:ro
+     environment:
+       - TZ=Europe/Paris

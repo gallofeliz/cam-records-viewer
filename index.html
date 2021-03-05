@@ -4,35 +4,76 @@
     <title></title>
     <style type="text/css">
         #viewer {
+            width: 768px;
+            margin: auto;
+            position: relative;
         }
         #viewer img {
-            max-width: 768px;
+            width: 768px;
+            height: 432px;
         }
         #frame {
             display: block;
             width: 768px;
+        }
+        #control {
+            font-size: 30px;
+            padding-inline-start: 0px;
+            text-align: center;
+        }
+        #control li {
+            display: inline-block;
+            cursor: pointer;
+        }
+        .hide {
+            display: none;
+        }
+        #loader {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            color: #ddd;
         }
     </style>
 </head>
 <body>
 
     <div id="viewer">
+        <span id="loader" class="hide">...</span>
         <img />
-        <input type="range" id="frame" name="volume"
-         min="0" max="0">
-         <ul>
-             <li id="previous">Previous</li>
-             <li id="next">Next</li>
-
-             <li id="play">Play</li>
-             <li id="pause">Pause</li>
-             <li id="reset">Reset</li>
+        <input type="range" id="frame" name="volume" min="0" max="0">
+         <ul id="control">
+             <li id="previous">⏮</li>
+             <li id="next">⏭</li>
+             <li id="play">▶️</li>
+             <li id="pause">⏸️</li>
+             <li id="reset">⏹</li>
          </ul>
     </div>
 
     <script type="text/javascript">
 
         (async () => {
+            const maxFps = 25;
+            const frameTime = Math.round(1/maxFps*1000);
+            console.log(frameTime);
+
+            document.onkeydown = (e) => {
+                switch(e.keyCode) {
+                    case 32:
+                        if (playing) {
+                            document.querySelector('#pause').click()
+                        } else {
+                            document.querySelector('#play').click()
+                        }
+                        break;
+                    case 39:
+                        document.querySelector('#next').click()
+                        break;
+                    case 37:
+                        document.querySelector('#previous').click()
+                }
+            }
 
             const images = (await (await fetch('./images.json')).json())
 
@@ -40,13 +81,43 @@
 
             const img = document.querySelector('#viewer img')
             const frame = document.querySelector('#frame')
+            const loader = document.querySelector('#loader')
+
+            a = 1;
+            setInterval(() => {
+                if (a === 3) {
+                    a = -1;
+                }
+                loader.innerText = '.'.repeat(++a)
+            }, 250)
+
+            frame.onfocus = (e) => {
+                e.preventDefault();
+                frame.blur()
+            }
 
             frame.onchange = (e) => {
                 i = e.target.value;
                 loadImage();
             }
 
+            var inputTimeout;
+
+            frame.oninput = (e) => {
+                if (inputTimeout) {
+                    clearTimeout(inputTimeout);
+                }
+                inputTimeout = setTimeout(() => {
+                    i = e.target.value;
+                    loadImage();
+                }, 50)
+            }
+
+
             document.querySelector('#play').onclick = () => {
+                if (i === images.length - 1) {
+                    i=-1;
+                }
                 if (i < images.length - 1) {
                     playing = true;
                     i++;
@@ -65,8 +136,11 @@
             }
 
             document.querySelector('#previous').onclick = () => {
-                i--;
-                loadImage()
+                if (i>0) {
+                    i--;
+                    loadImage()
+
+                }
             }
 
             document.querySelector('#next').onclick = () => {
@@ -80,16 +154,27 @@
 
             var i = 0;
             var playing = false;
+            var lastLoadTime = 0;
 
             function loadImage() {
+                if (lastLoadTime + frameTime > (new Date).getTime()) {
+                    setTimeout(loadImage, lastLoadTime + frameTime - (new Date).getTime());
+                    return;
+                }
+
                 img.src=images[i]
                 frame.value = i
+                loader.classList.remove('hide');
+                lastLoadTime = (new Date).getTime();
             }
 
             img.onload = function () {
+                loader.classList.add('hide');
                 if (playing && i < images.length - 1) {
                     i++
                     loadImage()
+                } else if (playing) {
+                    playing = false
                 }
             }
 
