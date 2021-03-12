@@ -44,6 +44,12 @@
         #camera {
             margin-right: 10px;
         }
+        #speed {
+            width: 36px;
+        }
+        #speed-icon {
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -58,7 +64,8 @@
             <input type="text" id="start" class="calendar" />
             <span>📅</span>
             <input type="text" id="end" class="calendar" />
-
+            <span id="speed-icon">🚄</span>
+            <input type="number" id="speed" min="1" step="5" />
         </div>
          <ul id="control">
              <li id="previous">⏮</li>
@@ -74,12 +81,12 @@
     <script type="text/javascript">
 
         (async () => {
-            const maxFps = 25;
-            const frameTime = Math.round(1/maxFps*1000);
-            console.log(frameTime);
             const start = document.querySelector('#start')
             const end = document.querySelector('#end')
             const camera = document.querySelector('#camera')
+            const speed = document.querySelector('#speed')
+
+            speed.value = 25
 
             start.value = moment().startOf('day').format();
             end.value = moment().format();
@@ -222,6 +229,8 @@
             var lastLoadTime = 0;
 
             function loadImage() {
+                const frameTime = Math.round(1/speed.value*1000);
+
                 if (lastLoadTime + frameTime > (new Date).getTime()) {
                     setTimeout(loadImage, lastLoadTime + frameTime - (new Date).getTime());
                     return;
