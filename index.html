@@ -30,7 +30,7 @@
             cursor: pointer;
         }
         .hide {
-            display: none;
+            display: none !important;
         }
         #loader {
             position: absolute;
@@ -78,8 +78,8 @@
          <ul id="control">
              <li id="previous">⏮</li>
              <li id="next">⏭</li>
-             <li id="play">▶️</li>
-             <li id="pause">⏸️</li>
+             <li id="play" class="">▶️</li>
+             <li id="pause" class="hide">⏸️</li>
              <li id="reset">⏹</li>
          </ul>
         <span id="real-speed-container">
@@ -210,16 +210,19 @@
                     playing = true;
                     i++;
                     loadImage();
+                    updatePlayPause();
                 }
             }
 
             document.querySelector('#pause').onclick = () => {
                 playing = false;
+                updatePlayPause()
             }
 
             document.querySelector('#reset').onclick = () => {
                 playing = false;
                 i = 0;
+                updatePlayPause()
                 loadImage()
             }
 
@@ -239,6 +242,17 @@
             }
 
             var playing = false;
+
+            function updatePlayPause() {
+                if (playing) {
+                    document.querySelector('#play').classList.add('hide')
+                    document.querySelector('#pause').classList.remove('hide')
+                } else {
+                    document.querySelector('#pause').classList.add('hide')
+                    document.querySelector('#play').classList.remove('hide')
+                }
+            }
+
             var lastLoadTime = 0;
 
             let loaded = []
@@ -271,6 +285,7 @@
                     loadImage()
                 } else if (playing) {
                     playing = false
+                    updatePlayPause()
                 }
             }
 
