@@ -7,6 +7,8 @@
             width: 768px;
             margin: auto;
             position: relative;
+            background: #bbb;
+            padding: 10px;
         }
         #viewer img {
             width: 768px;
@@ -17,6 +19,8 @@
             width: 768px;
         }
         #control {
+            margin-top: 15px;
+            margin-bottom: 0px;
             font-size: 30px;
             padding-inline-start: 0px;
             text-align: center;
@@ -30,9 +34,15 @@
         }
         #loader {
             position: absolute;
-            right: 5px;
-            top: 5px;
+            left: 50%;
+            top: 410px;
             color: #ddd;
+        }
+        .calendar {
+            width: 106px;
+        }
+        #camera {
+            margin-right: 10px;
         }
     </style>
 </head>
@@ -42,6 +52,14 @@
         <span id="loader" class="hide">...</span>
         <img />
         <input type="range" id="frame" name="volume" min="0" max="0">
+        <div style="text-align: center; margin-top: 10px;">
+            <span>🎥</span>
+            <select id="camera"></select>
+            <input type="text" id="start" class="calendar" />
+            <span>📅</span>
+            <input type="text" id="end" class="calendar" />
+
+        </div>
          <ul id="control">
              <li id="previous">⏮</li>
              <li id="next">⏭</li>
@@ -50,13 +68,67 @@
              <li id="reset">⏹</li>
          </ul>
     </div>
-
+    <script type="text/javascript" src="moment.js"></script>
+    <script type="text/javascript" src="flatpickr.js"></script>
+    <link rel="stylesheet" type="text/css" href="flatpickr.css">
     <script type="text/javascript">
 
         (async () => {
             const maxFps = 25;
             const frameTime = Math.round(1/maxFps*1000);
             console.log(frameTime);
+            const start = document.querySelector('#start')
+            const end = document.querySelector('#end')
+            const camera = document.querySelector('#camera')
+
+            start.value = moment().startOf('day').format();
+            end.value = moment().format();
+
+            flatpickr(start, {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                maxDate: new Date,
+                time_24hr: true
+            });
+
+            flatpickr(end, {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                maxDate: new Date,
+                time_24hr: true
+            });
+
+            start.onchange = load
+            end.onchange = load
+            camera.onchange = load
+
+            let images = [];
+            let i = 0;
+
+            const cameras = (await (await fetch('./cameras.json')).json())
+
+            cameras.forEach(cam => {
+                const opt = document.createElement('option')
+                opt.value = cam
+                opt.innerText = cam
+                camera.appendChild(opt)
+            })
+
+            async function load(e) {
+                startStr = moment(start.value).format()
+                endStr = moment(end.value).format()
+                cam = camera.value
+                images = (await (await fetch('./images.json?camera='+encodeURIComponent(cam)+'&start='+ encodeURIComponent(startStr)+'&end='+ encodeURIComponent(endStr))).json())
+
+                if (images.length === 0) {
+                    images.push('https://as2.ftcdn.net/jpg/01/93/78/07/500_F_193780749_TNfDK6nxBjx6CxehzQUcUF8fhc8S6W9P.jpg');
+                }
+                frame.max = images.length - 1;
+                i = 0;
+                loadImage()
+            }
+
+            load()
 
             document.onkeydown = (e) => {
                 switch(e.keyCode) {
@@ -74,10 +146,6 @@
                         document.querySelector('#previous').click()
                 }
             }
-
-            const images = (await (await fetch('./images.json')).json())
-
-            console.log(images)
 
             const img = document.querySelector('#viewer img')
             const frame = document.querySelector('#frame')
@@ -150,9 +218,6 @@
                 }
             }
 
-            frame.max = images.length - 1;
-
-            var i = 0;
             var playing = false;
             var lastLoadTime = 0;
 
@@ -177,8 +242,6 @@
                     playing = false
                 }
             }
-
-            loadImage()
 
         })()
 

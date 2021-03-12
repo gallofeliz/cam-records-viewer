@@ -7,13 +7,35 @@ const glob = require('glob');
 const moment = require('moment');
 
 app.get('/', (req, res) => {
-  res.send(fs.readFileSync('./index.html', {encoding: 'utf8'}))
+    res.send(fs.readFileSync('./index.html', {encoding: 'utf8'}))
+})
+
+app.get('/moment.js', (req, res) => {
+    res.type('text/javascript')
+    res.send(fs.readFileSync('./node_modules/moment/moment.js', {encoding: 'utf8'}))
+});
+
+app.get('/flatpickr.js', (req, res) => {
+    res.type('text/javascript')
+    res.send(fs.readFileSync('./node_modules/flatpickr/dist/flatpickr.min.js', {encoding: 'utf8'}))
+})
+
+app.get('/flatpickr.css', (req, res) => {
+    res.type('text/css')
+    res.send(fs.readFileSync('./node_modules/flatpickr/dist/flatpickr.min.css', {encoding: 'utf8'}))
+})
+
+app.get('/cameras.json', (req, res) => {
+    glob(`*/`, {cwd: 'images'}, (e, dirs) => {
+        res.json(dirs.map(dir => dir.replace('/', '')))
+    })
 })
 
 app.get('/images.json', (req, res) => {
 
-    const from = moment().subtract(1, 'day')
-    const to = moment();
+    const camera = req.query.camera;
+    const from = moment(req.query.start)
+    const to = moment(req.query.end);
     const nbDays = to.diff(from, 'hours') + 1;
     const dirsSearch = []
     const filesSearch = (new Array(nbDays)).fill().map((_, i) =>  {
@@ -26,22 +48,35 @@ app.get('/images.json', (req, res) => {
     }
     );
 
+    const globP = `images/${camera}/@(${dirsSearch.join('|')})/@(${filesSearch.join('|')})*.jpg`
 
-    glob(`images/@(${dirsSearch.join('|')})/@(${filesSearch.join('|')})*.jpg`, (e, files) => {
+    console.log(globP)
+
+    glob(globP, (e, files) => {
+        if (e) {
+            res.status(500)
+            res.end()
+            console.error(e)
+        }
         res.json(files)
     })
 
 })
 
-app.get('/images/:a/:b.jpg', async (req, res) => {
-    const imagePath = 'images/' + req.params.a + '/' + req.params.b + '.jpg'
+app.get('/images/:a/:b/:c.jpg', async (req, res) => {
+    const imagePath = 'images/' + req.params.a + '/' + req.params.b + '/' + req.params.c + '.jpg'
 
-     res.send(fs.readFileSync(imagePath))
- return;
+    try {
+        res.send(fs.readFileSync(imagePath))
+    } catch (e) {
+        res.status(500)
+        res.end()
+        console.error(e)
+    }
 
-    res.send(await sharp(imagePath)
-        .resize(768)
-        .toBuffer())
+    // res.send(await sharp(imagePath)
+    //     .resize(768)
+    //     .toBuffer())
 
 })
 

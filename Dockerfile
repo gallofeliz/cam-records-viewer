@@ -2,7 +2,7 @@ FROM node:alpine
 
 WORKDIR /app
 
-RUN npm i express glob moment
+RUN npm i express glob moment flatpickr
 
 #RUN apk add --no-cache python
 
