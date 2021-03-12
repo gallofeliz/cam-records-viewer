@@ -50,6 +50,14 @@
         #speed-icon {
             margin-left: 10px;
         }
+        #real-speed-container {
+            position: absolute;
+            bottom: 3px;
+            right: 3px;
+            color: #777;
+            font-style: italic;
+            font-size: 15px;
+        }
     </style>
 </head>
 <body>
@@ -74,6 +82,10 @@
              <li id="pause">⏸️</li>
              <li id="reset">⏹</li>
          </ul>
+        <span id="real-speed-container">
+               <span id="real-speed">0</span> fps
+           </span>
+
     </div>
     <script type="text/javascript" src="moment.js"></script>
     <script type="text/javascript" src="flatpickr.js"></script>
@@ -85,6 +97,7 @@
             const end = document.querySelector('#end')
             const camera = document.querySelector('#camera')
             const speed = document.querySelector('#speed')
+            const realSpeed = document.querySelector('#real-speed')
 
             speed.value = 25
 
@@ -228,6 +241,14 @@
             var playing = false;
             var lastLoadTime = 0;
 
+            let loaded = []
+
+            setInterval(() => {
+                const limit = (new Date).getTime() - 1000
+                loaded = loaded.filter(v => v >= limit) // Inutil iterations for the end of the array
+                realSpeed.innerText = loaded.length
+            }, 1000)
+
             function loadImage() {
                 const frameTime = Math.round(1/speed.value*1000);
 
@@ -243,6 +264,7 @@
             }
 
             img.onload = function () {
+                loaded.push((new Date).getTime())
                 loader.classList.add('hide');
                 if (playing && i < images.length - 1) {
                     i++
