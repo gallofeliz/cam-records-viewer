@@ -63,8 +63,8 @@ app.get('/images.json', (req, res) => {
 
 })
 
-app.get('/images/:a/:b/:c.jpg', async (req, res) => {
-    const imagePath = 'images/' + req.params.a + '/' + req.params.b + '/' + req.params.c + '.jpg'
+app.get('/images/:camera/:date/:datetime.jpg', async (req, res) => {
+    const imagePath = 'images/' + req.params.camera + '/' + req.params.date + '/' + (req.query.thumb ? 'thumbs/' : '') + req.params.datetime + '.jpg'
 
     try {
         res.type('image/jpeg')
