@@ -67,6 +67,7 @@ app.get('/images/:a/:b/:c.jpg', async (req, res) => {
     const imagePath = 'images/' + req.params.a + '/' + req.params.b + '/' + req.params.c + '.jpg'
 
     try {
+        res.type('image/jpeg')
         res.send(fs.readFileSync(imagePath))
     } catch (e) {
         res.status(500)
