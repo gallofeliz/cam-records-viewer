@@ -74,6 +74,7 @@
             <input type="text" id="end" class="calendar" />
             <span id="speed-icon">🚄</span>
             <input type="number" id="speed" min="1" step="5" />
+            <span style="margin-left: 10px;"><strong>LD</strong> / HD</span>
         </div>
          <ul id="control">
              <li id="previous">⏮</li>
@@ -134,7 +135,20 @@
                 camera.appendChild(opt)
             })
 
+            let previousStart;
             async function load(e) {
+                if (e && e.target === start) {
+                    // If start changes a lot
+                    if (Math.abs(moment(start.value).diff(previousStart, 'days', true)) > 1) {
+                        end.value = '';
+                        return;
+                    }
+                }
+                if (Math.abs(moment(start.value).diff(previousStart, 'days')) >= 7) {
+                    alert('No more than 1 week'); // To avoid to down the server and others problems (Very big response)
+                    return;
+                }
+                previousStart = start.value
                 startStr = moment(start.value).format()
                 endStr = moment(end.value).format()
                 cam = camera.value
