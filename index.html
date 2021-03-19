@@ -175,7 +175,7 @@
                         return;
                     }
                 }
-                if (Math.abs(moment(start.value).diff(previousStart, 'days')) >= 7) {
+                if (Math.abs(moment(start.value).diff(end.value, 'days')) >= 7) {
                     alert('No more than 1 week'); // To avoid to down the server and others problems (Very big response)
                     return;
                 }
@@ -322,7 +322,7 @@
                 lastLoadTime = (new Date).getTime();
             }
 
-            img.onload = function () {
+            var onLoaded = function () {
                 loaded.push((new Date).getTime())
                 loader.classList.add('hide');
                 if (playing && i < images.length - 1) {
@@ -333,6 +333,20 @@
                     updatePlayPause()
                 }
             }
+
+            var badImg = 'https://assets-global.website-files.com/6009ec8cda7f305645c9d91b/601082646d6bf4446451b0a4_6002086f72b72717ae01d954_google-doc-error-message.png';
+
+            img.onerror = function (e) {
+                console.error(e)
+                if (img.src !== badImg) {
+                    img.src = badImg
+                    return;
+                } else {
+                    onLoaded()
+                }
+            }
+
+            img.onload = onLoaded
 
         })()
 
