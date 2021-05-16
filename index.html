@@ -59,7 +59,7 @@
         .selected {
             font-weight: bold;
         }
-        #size-ld, #size-hd {
+        #size-ld, #size-hd, #size-auto {
             cursor: pointer;
         }
     </style>
@@ -79,7 +79,13 @@
             <input type="text" id="end" class="calendar" />
             <span id="speed-icon">🚄</span>
             <input type="number" id="speed" min="1" step="2" />
-            <span style="margin-left: 10px;"><span id="size-ld" class="selected">LD</span> / <span id="size-hd">HD</span></span>
+            <span style="margin-left: 10px;">
+                <span id="size-auto" class="selected">Auto</span>
+                /
+                <span id="size-ld">LD</span>
+                /
+                <span id="size-hd">HD</span>
+            </span>
         </div>
          <ul id="control">
              <li id="previous">⏮</li>
@@ -149,20 +155,35 @@
             const realSpeed = document.querySelector('#real-speed')
             const sizeHd = document.querySelector('#size-hd')
             const sizeLd = document.querySelector('#size-ld')
+            const sizeAuto = document.querySelector('#size-auto')
 
             sizeHd.onclick = (e) => {
                 viewer.classList.remove('size-ld')
+                viewer.classList.remove('size-auto')
                 viewer.classList.add('size-hd')
                 sizeLd.classList.remove('selected')
+                sizeAuto.classList.remove('selected')
                 sizeHd.classList.add('selected')
                 loadImage()
             }
 
             sizeLd.onclick = (e) => {
                 viewer.classList.add('size-ld')
+                viewer.classList.remove('size-auto')
                 viewer.classList.remove('size-hd')
                 sizeLd.classList.add('selected')
                 sizeHd.classList.remove('selected')
+                sizeAuto.classList.remove('selected')
+                loadImage()
+            }
+
+            sizeAuto.onclick = (e) => {
+                viewer.classList.add('size-auto')
+                viewer.classList.remove('size-ld')
+                viewer.classList.remove('size-hd')
+                sizeAuto.classList.add('selected')
+                sizeHd.classList.remove('selected')
+                sizeLd.classList.remove('selected')
                 loadImage()
             }
 
@@ -343,18 +364,25 @@
                 realSpeed.innerText = loaded.length
             }, 1000)
 
+            let currentQuality;
+
             function loadImage() {
                 const frameTime = Math.round(1/speed.value*1000);
 
                 if (lastLoadTime + frameTime > (new Date).getTime()) {
-                    setTimeout(loadImage, lastLoadTime + frameTime - (new Date).getTime());
+                    setTimeout(() => loadImage(), lastLoadTime + frameTime - (new Date).getTime());
                     return;
                 }
-
-                img.src=images[i] + (viewer.classList.contains('size-ld') ? '?thumb=true' : '')
+                currentQuality = viewer.classList.contains('size-ld') || viewer.classList.contains('size-auto') ? 'LD' : 'HD'
+                img.src=images[i] + (currentQuality === 'LD' ? '?thumb=true' : '')
                 frame.value = i
                 loader.classList.remove('hide');
                 lastLoadTime = (new Date).getTime();
+            }
+
+            function finalizeImage() {
+                currentQuality = 'HD'
+                img.src=images[i]
             }
 
             var onLoaded = function () {
@@ -363,9 +391,13 @@
                 if (playing && i < images.length - 1) {
                     i++
                     loadImage()
+                    return
                 } else if (playing) {
                     playing = false
                     updatePlayPause()
+                }
+                if (currentQuality === 'LD' && viewer.classList.contains('size-auto')) {
+                    finalizeImage()
                 }
             }
 
