@@ -2,7 +2,7 @@ FROM node:alpine3.12
 
 WORKDIR /app
 
-RUN npm i express glob moment flatpickr
+RUN npm i express glob moment flatpickr @fortawesome/fontawesome-free
 
 #RUN apk add --no-cache python
 

@@ -70,6 +70,7 @@ position: absolute;
     cursor: move;
         }
     </style>
+    <link href="fontawesome.css" rel="stylesheet"> <!--load all styles -->
 </head>
 <body>
 
@@ -79,12 +80,12 @@ position: absolute;
         <div id="footer">
             <input type="range" id="frame" name="volume" min="0" max="0">
             <div style="text-align: center; margin-top: 10px;">
-                <span>🎥</span>
+                <span><i class="fas fa-camera"></i></span>
                 <select id="camera"></select>
                 <input type="text" id="start" class="calendar" />
-                <span>📅</span>
+                <span><i class="fas fa-calendar-alt"></i></span>
                 <input type="text" id="end" class="calendar" />
-                <span id="speed-icon"><img src="https://image.flaticon.com/icons/png/512/748/748060.png" width="20" /></span>
+                <span id="speed-icon"><i class="fas fa-tachometer-alt"></i></span>
                 <input type="number" id="speed" min="1" step="2" />
                 <span style="margin-left: 10px;">
                     <span id="size-auto" class="selected">Auto</span>
@@ -93,14 +94,14 @@ position: absolute;
                     /
                     <span id="size-hd">HD</span>
                 </span>
-                <span id="attach-detach" style="cursor: pointer; position: absolute; bottom: 5px; left: 5px;">🔗</span>
+                <span id="attach-detach" style="cursor: pointer; position: absolute; bottom: 5px; left: 5px;"><i class="fas fa-link"></i></span>
             </div>
              <ul id="control">
-                 <li id="previous">⏮</li>
-                 <li id="next">⏭</li>
-                 <li id="play" class="">▶️</li>
-                 <li id="pause" class="hide">⏸️</li>
-                 <li id="reset">⏹</li>
+                 <li id="previous"><i class="fas fa-backward"></i></li>
+                 <li id="next"><i class="fas fa-forward"></i></li>
+                 <li id="play" class=""><i class="fas fa-play"></i></li>
+                 <li id="pause" class="hide"><i class="fas fa-pause"></i></li>
+                 <li id="reset"><i class="fas fa-stop"></i></li>
              </ul>
         </div>
         <span id="real-speed-container">

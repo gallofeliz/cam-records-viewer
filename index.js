@@ -20,6 +20,21 @@ app.get('/flatpickr.js', (req, res) => {
     res.send(fs.readFileSync('./node_modules/flatpickr/dist/flatpickr.min.js', {encoding: 'utf8'}))
 })
 
+app.get('/fontawesome.css', (req, res) => {
+    res.type('text/css')
+    res.send(fs.readFileSync('./node_modules/@fortawesome/fontawesome-free/css/all.css', {encoding: 'utf8'}))
+})
+
+app.get('/webfonts/fa-solid-900.woff2', (req, res) => {
+    res.type('font/woff2')
+    res.send(fs.readFileSync('./node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2'))
+})
+
+app.get('/webfonts/fa-regular-400.woff2', (req, res) => {
+    res.type('font/woff2')
+    res.send(fs.readFileSync('./node_modules/@fortawesome/fontawesome-free/webfonts/fa-regular-400.woff2'))
+})
+
 app.get('/flatpickr.css', (req, res) => {
     res.type('text/css')
     res.send(fs.readFileSync('./node_modules/flatpickr/dist/flatpickr.min.css', {encoding: 'utf8'}))
