@@ -9,7 +9,7 @@
             background: #bbb;
             padding: 10px;
         }
-        #viewer img {
+        #viewer #viewerimg {
             width: 100%;
         }
         #frame {
@@ -47,6 +47,7 @@
         }
         #speed-icon {
             margin-left: 10px;
+            vertical-align: middle;
         }
         #real-speed-container {
             position: absolute;
@@ -62,6 +63,12 @@
         #size-ld, #size-hd, #size-auto {
             cursor: pointer;
         }
+        .fly {
+position: absolute;
+    background: #bbb;
+    padding: 10px;
+    cursor: move;
+        }
     </style>
 </head>
 <body>
@@ -70,31 +77,32 @@
         <span id="loader" class="hide">...</span>
         <img id="viewerimg" />
         <div id="footer">
-        <input type="range" id="frame" name="volume" min="0" max="0">
-        <div style="text-align: center; margin-top: 10px;">
-            <span>🎥</span>
-            <select id="camera"></select>
-            <input type="text" id="start" class="calendar" />
-            <span>📅</span>
-            <input type="text" id="end" class="calendar" />
-            <span id="speed-icon">🚄</span>
-            <input type="number" id="speed" min="1" step="2" />
-            <span style="margin-left: 10px;">
-                <span id="size-auto" class="selected">Auto</span>
-                /
-                <span id="size-ld">LD</span>
-                /
-                <span id="size-hd">HD</span>
-            </span>
+            <input type="range" id="frame" name="volume" min="0" max="0">
+            <div style="text-align: center; margin-top: 10px;">
+                <span>🎥</span>
+                <select id="camera"></select>
+                <input type="text" id="start" class="calendar" />
+                <span>📅</span>
+                <input type="text" id="end" class="calendar" />
+                <span id="speed-icon"><img src="https://image.flaticon.com/icons/png/512/748/748060.png" width="20" /></span>
+                <input type="number" id="speed" min="1" step="2" />
+                <span style="margin-left: 10px;">
+                    <span id="size-auto" class="selected">Auto</span>
+                    /
+                    <span id="size-ld">LD</span>
+                    /
+                    <span id="size-hd">HD</span>
+                </span>
+                <span id="attach-detach" style="cursor: pointer; position: absolute; bottom: 5px; left: 5px;">🔗</span>
+            </div>
+             <ul id="control">
+                 <li id="previous">⏮</li>
+                 <li id="next">⏭</li>
+                 <li id="play" class="">▶️</li>
+                 <li id="pause" class="hide">⏸️</li>
+                 <li id="reset">⏹</li>
+             </ul>
         </div>
-         <ul id="control">
-             <li id="previous">⏮</li>
-             <li id="next">⏭</li>
-             <li id="play" class="">▶️</li>
-             <li id="pause" class="hide">⏸️</li>
-             <li id="reset">⏹</li>
-         </ul>
-     </div>
         <span id="real-speed-container">
                <span id="real-speed">0</span> fps
            </span>
@@ -108,11 +116,17 @@
         (async () => {
             const viewer = document.querySelector('#viewer')
             const img = document.querySelector('#viewer img')
-
+            const footer = document.getElementById('footer');
             function resizeImgViewer() {
                 const viewportRect = {
                     width: document.documentElement.clientWidth - 16,
                     height: document.documentElement.clientHeight - 16
+                }
+
+                let footerSize = document.getElementById('footer').offsetHeight;
+
+                if (footer.classList.contains('fly')) {
+                    footerSize = 5;
                 }
 
                 const imageRatio = 1.777777778
@@ -124,7 +138,7 @@
                         height: viewportRect.height - 20
                     }
 
-                    viewerSize.width = (viewerSize.height - document.getElementById('footer').offsetHeight - 10) * imageRatio
+                    viewerSize.width = (viewerSize.height - footerSize - 10) * imageRatio
 
                 } else {
                     console.log('2')
@@ -132,7 +146,7 @@
                         width: viewportRect.width - 20
                     }
 
-                    viewerSize.height = (viewerSize.width / imageRatio + document.getElementById('footer').offsetHeight) + 10
+                    viewerSize.height = (viewerSize.width / imageRatio + footerSize) + 10
                 }
 
                 console.log(viewerSize)
@@ -156,6 +170,44 @@
             const sizeHd = document.querySelector('#size-hd')
             const sizeLd = document.querySelector('#size-ld')
             const sizeAuto = document.querySelector('#size-auto')
+
+            const attachDetach = document.querySelector('#attach-detach')
+
+
+            attachDetach.onclick = (e) => {
+                if (!footer.classList.contains('fly')) {
+                    document.body.append(footer)
+                    footer.style.bottom = '20px'
+                    footer.style.left = '20px'
+                    footer.classList.add('fly')
+                } else {
+                    document.getElementById('viewer').append(footer)
+                    footer.classList.remove('fly')
+                }
+                resizeImgViewer()
+            }
+
+            footer.onmousedown = (e) => {
+                const targetted = e.target === footer || e.target === document.getElementById('control');
+                if (!targetted || !footer.classList.contains('fly')) {
+                    return;
+                }
+
+
+                e.preventDefault()
+                const layer = {x: e.layerX, y: e.layerY}
+
+                document.onmousemove = (e) => {
+                    footer.style.bottom = ''
+                    footer.style.top = (e.clientY - layer.y) + 'px'
+                    footer.style.left = (e.clientX - layer.x)  + 'px'
+                }
+
+                document.onmouseup = (e) => {
+                    document.onmousemove = null;
+                    document.onmouseup = null;
+                }
+            }
 
             sizeHd.onclick = (e) => {
                 viewer.classList.remove('size-ld')
