@@ -42,12 +42,11 @@
         #camera {
             margin-right: 10px;
         }
-        #speed {
+        #speed, #step {
             width: 36px;
         }
         #speed-icon {
             margin-left: 10px;
-            vertical-align: middle;
         }
         #real-speed-container {
             position: absolute;
@@ -87,6 +86,10 @@ position: absolute;
                 <input type="text" id="end" class="calendar" />
                 <span id="speed-icon"><i class="fas fa-tachometer-alt"></i></span>
                 <input type="number" id="speed" min="1" step="2" />
+                <span style="margin-left: 10px;">
+                    <i class="fas fa-shoe-prints"></i>
+                    <input type="number" id="step" min="1" step="1" />
+                </span>
                 <span style="margin-left: 10px;">
                     <span id="size-auto" class="selected">Auto</span>
                     /
@@ -167,6 +170,7 @@ position: absolute;
             const end = document.querySelector('#end')
             const camera = document.querySelector('#camera')
             const speed = document.querySelector('#speed')
+            const step = document.querySelector('#step')
             const realSpeed = document.querySelector('#real-speed')
             const sizeHd = document.querySelector('#size-hd')
             const sizeLd = document.querySelector('#size-ld')
@@ -241,6 +245,7 @@ position: absolute;
             }
 
             speed.value = 25
+            step.value = 1
 
             start.value = moment().startOf('day').format();
             end.value = moment().format();
@@ -357,15 +362,13 @@ position: absolute;
 
 
             document.querySelector('#play').onclick = () => {
-                if (i === images.length - 1) {
+                if (!isIIncrementable()) {
                     i=-1;
                 }
-                if (i < images.length - 1) {
-                    playing = true;
-                    i++;
-                    loadImage();
-                    updatePlayPause();
-                }
+                playing = true;
+                incrementI();
+                loadImage();
+                updatePlayPause();
             }
 
             document.querySelector('#pause').onclick = () => {
@@ -381,16 +384,16 @@ position: absolute;
             }
 
             document.querySelector('#previous').onclick = () => {
-                if (i>0) {
-                    i--;
+                if (isIDecrementable()) {
+                    decrementI();
                     loadImage()
 
                 }
             }
 
             document.querySelector('#next').onclick = () => {
-                if (i < images.length - 1) {
-                    i++;
+                if (isIIncrementable()) {
+                    incrementI();
                     loadImage()
                 }
             }
@@ -438,11 +441,27 @@ position: absolute;
                 img.src=images[i]
             }
 
+            function isIIncrementable() {
+                return i < images.length - 1;
+            }
+
+            function isIDecrementable() {
+                return i > 0;
+            }
+
+            function incrementI() {
+                i+= Math.min(images.length - i - 1, parseInt(step.value, 10))
+            }
+
+            function decrementI() {
+                i-= Math.min(i, parseInt(step.value, 10))
+            }
+
             var onLoaded = function () {
                 loaded.push((new Date).getTime())
                 loader.classList.add('hide');
-                if (playing && i < images.length - 1) {
-                    i++
+                if (playing && isIIncrementable()) {
+                    incrementI()
                     loadImage()
                     return
                 } else if (playing) {
