@@ -85,10 +85,10 @@ position: absolute;
                 <span><i class="fas fa-calendar-alt"></i></span>
                 <input type="text" id="end" class="calendar" />
                 <span id="speed-icon"><i class="fas fa-tachometer-alt"></i></span>
-                <input type="number" id="speed" min="1" step="2" />
+                <input type="number" id="speed" min="1" step="5" />
                 <span style="margin-left: 10px;">
                     <i class="fas fa-shoe-prints"></i>
-                    <input type="number" id="step" min="1" step="1" />
+                    <input type="number" id="step" min="1" step="5" />
                 </span>
                 <span style="margin-left: 10px;">
                     <span id="size-auto" class="selected">Auto</span>
@@ -344,7 +344,7 @@ position: absolute;
             }
 
             frame.onchange = (e) => {
-                i = e.target.value;
+                i = parseInt(e.target.value, 10);
                 loadImage();
             }
 
