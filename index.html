@@ -355,7 +355,7 @@ position: absolute;
                     clearTimeout(inputTimeout);
                 }
                 inputTimeout = setTimeout(() => {
-                    i = e.target.value;
+                    i = parseInt(e.target.value, 10);
                     loadImage();
                 }, 50)
             }
