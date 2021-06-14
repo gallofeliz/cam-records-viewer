@@ -69,7 +69,7 @@ position: absolute;
     cursor: move;
         }
     </style>
-    <link href="fontawesome.css" rel="stylesheet"> <!--load all styles -->
+    <link href="node_modules/@fortawesome/fontawesome-free/css/all.css" rel="stylesheet"> <!--load all styles -->
 </head>
 <body>
 
@@ -112,9 +112,9 @@ position: absolute;
            </span>
 
     </div>
-    <script type="text/javascript" src="moment.js"></script>
-    <script type="text/javascript" src="flatpickr.js"></script>
-    <link rel="stylesheet" type="text/css" href="flatpickr.css">
+    <script type="text/javascript" src="node_modules/moment/moment.js"></script>
+    <script type="text/javascript" src="node_modules/flatpickr/dist/flatpickr.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="node_modules/flatpickr/dist/flatpickr.min.css">
     <script type="text/javascript">
 
         (async () => {
@@ -283,6 +283,7 @@ position: absolute;
             end.onchange = load
             camera.onchange = load
 
+            let currentCam;
             let images = [];
             let i = 0;
 
@@ -317,6 +318,7 @@ position: absolute;
                 if (images.length === 0) {
                     images.push('https://as2.ftcdn.net/jpg/01/93/78/07/500_F_193780749_TNfDK6nxBjx6CxehzQUcUF8fhc8S6W9P.jpg');
                 }
+                currentCam = cam;
                 frame.max = images.length - 1;
                 i = 0;
                 loadImage()
@@ -445,7 +447,7 @@ position: absolute;
                     return;
                 }
                 currentQuality = viewer.classList.contains('size-ld') || viewer.classList.contains('size-auto') ? 'LD' : 'HD'
-                img.src=images[i] + (currentQuality === 'LD' ? '?thumb=true' : '')
+                img.src='images/' + currentCam + '/' + images[i] + '.jpg' + (currentQuality === 'LD' ? '?thumb=true' : '')
                 frame.value = i
                 loader.classList.remove('hide');
                 lastLoadTime = (new Date).getTime();
@@ -453,7 +455,7 @@ position: absolute;
 
             function finalizeImage() {
                 currentQuality = 'HD'
-                img.src=images[i]
+                img.src='images/' + currentCam + '/' + images[i] + '.jpg'
             }
 
             function isIIncrementable() {

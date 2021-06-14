@@ -2,12 +2,8 @@ FROM node:alpine3.12
 
 WORKDIR /app
 
-RUN npm i express glob moment flatpickr @fortawesome/fontawesome-free
+RUN npm i express glob moment flatpickr @fortawesome/fontawesome-free glob-promise
 
-#RUN apk add --no-cache python
-
-#RUN npm i  sharp
-
-ADD index.html index.js ./
+ADD index.js index.html ./
 
 CMD ["node", "index.js"]

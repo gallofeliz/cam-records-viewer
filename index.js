@@ -2,55 +2,18 @@ const express = require('express')
 const app = express()
 const port = 8080
 const fs = require('fs')
-//const sharp = require('sharp');
-const glob = require('glob');
-const moment = require('moment');
+const glob = require('glob-promise')
+const moment = require('moment')
 
-app.get('/', (req, res) => {
-    res.send(fs.readFileSync('./index.html', {encoding: 'utf8'}))
-})
+async function listCameras() {
+    const dirs = await glob(`*/`, {cwd: 'images'})
 
-app.get('/moment.js', (req, res) => {
-    res.type('text/javascript')
-    res.send(fs.readFileSync('./node_modules/moment/moment.js', {encoding: 'utf8'}))
-});
+    return dirs.map(dir => dir.replace('/', ''))
+}
 
-app.get('/flatpickr.js', (req, res) => {
-    res.type('text/javascript')
-    res.send(fs.readFileSync('./node_modules/flatpickr/dist/flatpickr.min.js', {encoding: 'utf8'}))
-})
-
-app.get('/fontawesome.css', (req, res) => {
-    res.type('text/css')
-    res.send(fs.readFileSync('./node_modules/@fortawesome/fontawesome-free/css/all.css', {encoding: 'utf8'}))
-})
-
-app.get('/webfonts/fa-solid-900.woff2', (req, res) => {
-    res.type('font/woff2')
-    res.send(fs.readFileSync('./node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2'))
-})
-
-app.get('/webfonts/fa-regular-400.woff2', (req, res) => {
-    res.type('font/woff2')
-    res.send(fs.readFileSync('./node_modules/@fortawesome/fontawesome-free/webfonts/fa-regular-400.woff2'))
-})
-
-app.get('/flatpickr.css', (req, res) => {
-    res.type('text/css')
-    res.send(fs.readFileSync('./node_modules/flatpickr/dist/flatpickr.min.css', {encoding: 'utf8'}))
-})
-
-app.get('/cameras.json', (req, res) => {
-    glob(`*/`, {cwd: 'images'}, (e, dirs) => {
-        res.json(dirs.map(dir => dir.replace('/', '')))
-    })
-})
-
-app.get('/images.json', (req, res) => {
-
-    const camera = req.query.camera;
-    const from = moment(req.query.start)
-    const to = moment(req.query.end);
+async function listImages(camera, {from, to}) {
+    from = moment(from)
+    to = moment(to);
     const nbDays = to.diff(from, 'hours') + 1;
     const dirsSearch = []
     const filesSearch = (new Array(nbDays)).fill().map((_, i) =>  {
@@ -63,37 +26,47 @@ app.get('/images.json', (req, res) => {
     }
     );
 
-    const globP = `images/${camera}/@(${dirsSearch.join('|')})/@(${filesSearch.join('|')})*.jpg`
+    const globP = `@(${dirsSearch.join('|')})/@(${filesSearch.join('|')})*.jpg`
+    const files = await glob(globP, {cwd: `images/${camera}`});
 
-    console.log(globP)
+    return files.map(file => file.split('/')[1].split('.')[0]);
+}
 
-    glob(globP, (e, files) => {
-        if (e) {
-            res.status(500)
-            res.end()
-            console.error(e)
-        }
-        res.json(files)
-    })
+async function getImagePath(camera, datetime, thumb) {
+    const parts = [
+        'images',
+        camera,
+        datetime.split('T')[0],
+        thumb ? 'thumbs' : null,
+        datetime
+    ].filter(part => part)
 
+    return parts.join('/') + '.jpg'
+}
+
+// The best practice ever ahah
+app.use('/', express.static('.'));
+
+app.get('/cameras.json', async (req, res) => {
+    res.json(await listCameras())
 })
 
-app.get('/images/:camera/:date/:datetime.jpg', async (req, res) => {
-    const imagePath = 'images/' + req.params.camera + '/' + req.params.date + '/' + (req.query.thumb ? 'thumbs/' : '') + req.params.datetime + '.jpg'
+app.get('/images.json', async (req, res) => {
+    res.json(await listImages(
+        req.query.camera,
+        {
+            from: req.query.start,
+            to: req.query.end
+        }
+    ))
+})
 
-    try {
-        res.type('image/jpeg')
-        res.send(fs.readFileSync(imagePath))
-    } catch (e) {
-        res.status(500)
-        res.end()
-        console.error(e)
-    }
-
-    // res.send(await sharp(imagePath)
-    //     .resize(768)
-    //     .toBuffer())
-
+app.get('/images/:camera/:datetime.jpg', async (req, res) => {
+    res.sendFile(await getImagePath(
+        req.params.camera,
+        req.params.datetime,
+        req.query.thumb
+    ), {root: '.'})
 })
 
 app.listen(port, () => {
