@@ -16,14 +16,14 @@
             display: block;
             width: 100%;
         }
-        #control {
+        #controls {
             margin-top: 15px;
             margin-bottom: 0px;
             font-size: 30px;
             padding-inline-start: 0px;
             text-align: center;
         }
-        #control li {
+        #controls li {
             display: inline-block;
             cursor: pointer;
         }
@@ -63,16 +63,22 @@
             cursor: pointer;
         }
         .fly {
-position: absolute;
-    background: #bbb;
-    padding: 10px;
-    cursor: move;
+            position: absolute;
+            background: #bbb;
+            padding: 10px;
+            cursor: move;
+        }
+        #attach-detach {
+            cursor: pointer;
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
         }
     </style>
     <link href="node_modules/@fortawesome/fontawesome-free/css/all.css" rel="stylesheet"> <!--load all styles -->
+    <link rel="stylesheet" type="text/css" href="node_modules/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
-
     <div id="viewer" class="size-auto">
         <span id="loader" class="hide">...</span>
         <img id="viewerimg" />
@@ -97,9 +103,9 @@ position: absolute;
                     /
                     <span id="size-hd">HD</span>
                 </span>
-                <span id="attach-detach" style="cursor: pointer; position: absolute; bottom: 5px; left: 5px;"><i class="fas fa-link"></i></span>
+                <span id="attach-detach"><i class="fas fa-link"></i></span>
             </div>
-             <ul id="control">
+             <ul id="controls">
                  <li id="previous"><i class="fas fa-backward"></i></li>
                  <li id="next"><i class="fas fa-forward"></i></li>
                  <li id="play" class=""><i class="fas fa-play"></i></li>
@@ -114,13 +120,25 @@ position: absolute;
     </div>
     <script type="text/javascript" src="node_modules/moment/moment.js"></script>
     <script type="text/javascript" src="node_modules/flatpickr/dist/flatpickr.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="node_modules/flatpickr/dist/flatpickr.min.css">
     <script type="text/javascript">
 
         (async () => {
             const viewer = document.querySelector('#viewer')
             const img = document.querySelector('#viewer img')
-            const footer = document.getElementById('footer');
+            const footer = document.getElementById('footer')
+            const start = document.querySelector('#start')
+            const end = document.querySelector('#end')
+            const camera = document.querySelector('#camera')
+            const speed = document.querySelector('#speed')
+            const step = document.querySelector('#step')
+            const realSpeed = document.querySelector('#real-speed')
+            const sizeHd = document.querySelector('#size-hd')
+            const sizeLd = document.querySelector('#size-ld')
+            const sizeAuto = document.querySelector('#size-auto')
+            const attachDetach = document.querySelector('#attach-detach')
+            const frame = document.querySelector('#frame')
+            const loader = document.querySelector('#loader')
+
             function resizeImgViewer() {
                 const viewportRect = {
                     width: document.documentElement.clientWidth - 16,
@@ -137,7 +155,6 @@ position: absolute;
                 const viewportRatio = viewportRect.width / viewportRect.height
                 let viewerSize;
                 if (viewportRatio >= imageRatio) {
-                    console.log('1')
                     viewerSize = {
                         height: viewportRect.height - 20
                     }
@@ -145,15 +162,12 @@ position: absolute;
                     viewerSize.width = (viewerSize.height - footerSize - 10) * imageRatio
 
                 } else {
-                    console.log('2')
                     viewerSize = {
                         width: viewportRect.width - 20
                     }
 
                     viewerSize.height = (viewerSize.width / imageRatio + footerSize) + 10
                 }
-
-                console.log(viewerSize)
 
                 viewer.style.width = viewerSize.width + 'px'
                 viewer.style.height = (viewerSize.height) + 'px'
@@ -165,19 +179,6 @@ position: absolute;
             resizeImgViewer()
 
             window.onresize = resizeImgViewer
-
-            const start = document.querySelector('#start')
-            const end = document.querySelector('#end')
-            const camera = document.querySelector('#camera')
-            const speed = document.querySelector('#speed')
-            const step = document.querySelector('#step')
-            const realSpeed = document.querySelector('#real-speed')
-            const sizeHd = document.querySelector('#size-hd')
-            const sizeLd = document.querySelector('#size-ld')
-            const sizeAuto = document.querySelector('#size-auto')
-
-            const attachDetach = document.querySelector('#attach-detach')
-
 
             attachDetach.onclick = (e) => {
                 if (!footer.classList.contains('fly')) {
@@ -193,7 +194,7 @@ position: absolute;
             }
 
             footer.onmousedown = (e) => {
-                const targetted = e.target === footer || e.target === document.getElementById('control');
+                const targetted = e.target === footer || e.target === document.getElementById('controls');
                 if (!targetted || !footer.classList.contains('fly')) {
                     return;
                 }
@@ -343,10 +344,6 @@ position: absolute;
                 }
             }
 
-
-            const frame = document.querySelector('#frame')
-            const loader = document.querySelector('#loader')
-
             a = 1;
             setInterval(() => {
                 if (a === 3) {
@@ -376,7 +373,6 @@ position: absolute;
                     loadImage();
                 }, 50)
             }
-
 
             document.querySelector('#play').onclick = () => {
                 if (!isIIncrementable()) {
