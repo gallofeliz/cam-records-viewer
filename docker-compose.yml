@@ -5,8 +5,8 @@
      build:
        context: .
      ports:
-       - "8080:8080"
+       - 8080:80
      volumes:
-       - ./images:/app/images:ro
+       - ./images:/data:ro
      environment:
        - TZ=Europe/Paris

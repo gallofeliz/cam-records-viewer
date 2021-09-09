@@ -1,12 +1,13 @@
 const express = require('express')
 const app = express()
-const port = 8080
+const port = process.env.PORT || 80
 const fs = require('fs')
 const glob = require('glob-promise')
 const moment = require('moment')
+const snapshotsPath = '/data'
 
 async function listCameras() {
-    const dirs = await glob(`*/`, {cwd: 'images'})
+    const dirs = await glob(`*/`, {cwd: snapshotsPath})
 
     return dirs.map(dir => dir.replace('/', ''))
 }
@@ -27,14 +28,14 @@ async function listImages(camera, {from, to}) {
     );
 
     const globP = `@(${dirsSearch.join('|')})/@(${filesSearch.join('|')})*.jpg`
-    const files = await glob(globP, {cwd: `images/${camera}`});
+    const files = await glob(globP, {cwd: `${snapshotsPath}/${camera}`});
 
     return files.map(file => file.split('/')[1].split('.')[0]);
 }
 
 async function getImagePath(camera, datetime, thumb) {
     const parts = [
-        'images',
+        snapshotsPath,
         camera,
         datetime.split('T')[0],
         thumb ? 'thumbs' : null,
@@ -66,7 +67,7 @@ app.get('/images/:camera/:datetime.jpg', async (req, res) => {
         req.params.camera,
         req.params.datetime,
         req.query.thumb
-    ), {root: '.'})
+    ), {root: '/'})
 })
 
 app.listen(port, () => {
